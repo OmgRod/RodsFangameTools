@@ -2,7 +2,7 @@
 #include <Geode/modify/EditLevelLayer.hpp>
 #include <Geode/modify/LevelPage.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
-// #include <Geode/modify/PauseLayer.hpp>
+#include <Geode/modify/LevelAreaInnerLayer.hpp>
 #include "Utils.hpp"
 
 using namespace geode::prelude;
@@ -95,7 +95,6 @@ class $modify(MyLevelPage, LevelPage) {
         level->copyLevelInfo(m_level);
         level->m_levelType = GJLevelType::Editor;
         level->m_levelString = llm->getMainLevelString(m_level->m_levelID);
-        level->m_originalLevel = m_level->m_originalLevel;
 
         CCScene* scene = EditLevelLayer::scene(level);
         CCTransitionFade* transition = CCTransitionFade::create(0.5f, scene);
@@ -112,61 +111,6 @@ class $modify(MyLevelPage, LevelPage) {
     }
 };
 
-/*class $modify(MyPauseLayer, PauseLayer) {
-    struct Fields {
-        CCMenu* m_menu;
-    };
-
-    void customSetup() override {
-        PauseLayer::customSetup();
-
-        auto layer = GameManager::sharedState()->getPlayLayer();
-        auto oldLevel = layer->m_level;
-
-        if (oldLevel->m_levelType == GJLevelType::Main) {
-            m_fields->m_menu = typeinfo_cast<CCMenu*>(this->getChildByID("center-button-menu"));
-            bool copyMainLevels = Mod::get()->getSettingValue<bool>("copy-main-levels");
-
-            if (copyMainLevels) {
-                CCSprite* buttonSprite = CircleButtonSprite::create(CCLabelBMFont::create("Copy\nLevel", "bigFont.fnt", 0.f, CCTextAlignment::kCCTextAlignmentCenter));
-                CCMenuItemSpriteExtra* button = CCMenuItemSpriteExtra::create(
-                    buttonSprite,
-                    this,
-                    menu_selector(MyPauseLayer::onCopyLevel)
-                );
-
-                m_fields->m_menu->addChild(button);
-                m_fields->m_menu->updateLayout();
-            }
-        }
-    }
-
-    void onCopyLevel(CCObject* sender) {
-        auto layer = GameManager::sharedState()->getPlayLayer();
-        auto oldLevel = layer->m_level;
-        
-        GameLevelManager* glm = GameLevelManager::sharedState();
-        GameManager* gm = GameManager::sharedState();
-        LocalLevelManager* llm = LocalLevelManager::sharedState();
-        CCDirector* ccd = CCDirector::sharedDirector();
-
-        if (ccd->getIsTransitioning()) return;
-        this->setKeypadEnabled(false);
-
-        // log::debug("Level string for \"{}\": {}", m_level->m_levelName, m_level->m_levelString);
-        
-        gm->m_sceneEnum = 2;
-        GJGameLevel* level = glm->createNewLevel();
-        level->copyLevelInfo(oldLevel);
-        level->m_levelType = GJLevelType::Editor;
-        level->m_levelString = llm->getMainLevelString(level->m_levelID);
-
-        CCScene* scene = EditLevelLayer::scene(level);
-        CCTransitionFade* transition = CCTransitionFade::create(0.5f, scene);
-        ccd->replaceScene(transition);
-    }
-};*/
-
 class $modify(MyEditorPauseLayer, EditorPauseLayer) {
     struct Fields {
         MDPopup* m_popup;
@@ -180,7 +124,7 @@ class $modify(MyEditorPauseLayer, EditorPauseLayer) {
         bool paste = Mod::get()->getSettingValue<bool>("paste-level-string");
 
         if (copy) {
-            CCSprite* buttonSprite = CircleButtonSprite::create(CCLabelBMFont::create("Copy\nLevel", "bigFont.fnt", 0.f, CCTextAlignment::kCCTextAlignmentCenter));
+            CCSprite* buttonSprite = CircleButtonSprite::create(CCLabelBMFont::create("Copy\nData", "bigFont.fnt", 0.f, CCTextAlignment::kCCTextAlignmentCenter));
             CCMenuItemSpriteExtra* button = CCMenuItemSpriteExtra::create(
                 buttonSprite,
                 this,
@@ -260,5 +204,65 @@ class $modify(MyEditorPauseLayer, EditorPauseLayer) {
 
     void showPopupButton() {
         m_fields->m_popup->m_buttonMenu->setVisible(true);
+    }
+};
+
+class $modify(MyLevelAreaInnerLayer, LevelAreaInnerLayer) {
+    bool init(bool returning) {
+        if (!LevelAreaInnerLayer::init(returning)) return false;
+
+        auto mainNode = this->getChildByID("main-node");
+        if (mainNode) {
+            auto menu = mainNode->getChildByID("main-menu");
+            if (menu) {
+                for (CCNode* button : menu->getChildrenExt()) {
+                    if (button->getTag() > 0) {
+                        CCSprite* buttonSprite = CircleButtonSprite::create(
+                            CCLabelBMFont::create("Copy\nLevel", "bigFont.fnt", 0.f, CCTextAlignment::kCCTextAlignmentCenter),
+                            CircleBaseColor::Green,
+                            CircleBaseSize::Small
+                        );
+                        CCMenuItemSpriteExtra* copyButton = CCMenuItemSpriteExtra::create(
+                            buttonSprite,
+                            this,
+                            menu_selector(MyLevelAreaInnerLayer::onCopyLevel)
+                        );
+
+                        copyButton->setPositionX(button->getPositionX());
+                        copyButton->setPositionY(button->getPositionY() - 45.f);
+                        copyButton->setTag(button->getTag());
+                        menu->addChild(copyButton);
+                    }
+                }
+            } else {
+                log::debug("no menu");
+            }
+        } else {
+            log::debug("no main node");
+        }
+
+        return true;
+    }
+
+    void onCopyLevel(CCObject* sender) {
+        GameLevelManager* glm = GameLevelManager::sharedState();
+        GameManager* gm = GameManager::sharedState();
+        LocalLevelManager* llm = LocalLevelManager::sharedState();
+        CCDirector* ccd = CCDirector::sharedDirector();
+
+        if (ccd->getIsTransitioning()) return;
+        this->setKeypadEnabled(false);
+
+        // log::debug("Level string for \"{}\": {}", m_level->m_levelName, m_level->m_levelString);
+        
+        gm->m_sceneEnum = 2;
+        GJGameLevel* level = glm->createNewLevel();
+        level->copyLevelInfo(GameLevelManager::sharedState()->getLocalLevel(sender->getTag()));
+        level->m_levelType = GJLevelType::Editor;
+        level->m_levelString = llm->getMainLevelString(sender->getTag());
+
+        CCScene* scene = EditLevelLayer::scene(level);
+        CCTransitionFade* transition = CCTransitionFade::create(0.5f, scene);
+        ccd->replaceScene(transition);
     }
 };
