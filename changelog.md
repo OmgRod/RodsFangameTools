@@ -1,9 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+- Fixed crash caused by entering The Tower on macOS
+
 ## v1.0.5
 
 - No changes
-- Erymanthus is wasting my time
 
 ## v1.0.4
 

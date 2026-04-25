@@ -220,6 +220,7 @@ class $modify(MyLevelAreaInnerLayer, LevelAreaInnerLayer) {
             if (mainNode) {
                 auto menu = mainNode->getChildByID("main-menu");
                 if (menu) {
+                    std::vector<CCNode*> copyButtons {};
                     for (CCNode* button : menu->getChildrenExt()) {
                         if (button->getTag() > 0) {
                             CCSprite* buttonSprite = CircleButtonSprite::create(
@@ -235,9 +236,14 @@ class $modify(MyLevelAreaInnerLayer, LevelAreaInnerLayer) {
 
                             copyButton->setPositionX(button->getPositionX());
                             copyButton->setPositionY(button->getPositionY() - 45.f);
-                            copyButton->setTag(button->getTag());
-                            menu->addChild(copyButton);
+                            copyButton->setUserObject("level-id-to-copy"_spr, CCInteger::create(button->getTag()));
+                            // copyButton->setTag(button->getTag());
+                            // menu->addChild(copyButton);
+                            copyButtons.push_back(copyButton);
                         }
+                    }
+                    for (CCNode* copyButtonToAdd : copyButtons) {
+                        menu->addChild(copyButtonToAdd);
                     }
                 } else {
                     log::debug("no menu");
@@ -251,6 +257,7 @@ class $modify(MyLevelAreaInnerLayer, LevelAreaInnerLayer) {
     }
 
     void onCopyLevel(CCObject* sender) {
+        if (!sender || !typeinfo_cast<CCInteger*>(static_cast<CCNode*>(sender)->getUserObject("level-id-to-copy"_spr))) return;
         GameLevelManager* glm = GameLevelManager::sharedState();
         GameManager* gm = GameManager::sharedState();
         LocalLevelManager* llm = LocalLevelManager::sharedState();
@@ -260,12 +267,13 @@ class $modify(MyLevelAreaInnerLayer, LevelAreaInnerLayer) {
         this->setKeypadEnabled(false);
 
         // log::debug("Level string for \"{}\": {}", m_level->m_levelName, m_level->m_levelString);
+        auto levelID = static_cast<CCInteger*>(static_cast<CCNode*>(sender)->getUserObject("level-id-to-copy"_spr))->getValue();
         
         gm->m_sceneEnum = 2;
         GJGameLevel* level = glm->createNewLevel();
-        level->copyLevelInfo(GameLevelManager::sharedState()->getLocalLevel(sender->getTag()));
+        level->copyLevelInfo(GameLevelManager::sharedState()->getMainLevel(levelID, true));
         level->m_levelType = GJLevelType::Editor;
-        level->m_levelString = llm->getMainLevelString(sender->getTag());
+        level->m_levelString = llm->getMainLevelString(levelID);
 
         CCScene* scene = EditLevelLayer::scene(level);
         CCTransitionFade* transition = CCTransitionFade::create(0.5f, scene);
