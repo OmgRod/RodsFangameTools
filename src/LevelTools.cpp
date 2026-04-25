@@ -152,28 +152,39 @@ class $modify(MyEditorPauseLayer, EditorPauseLayer) {
     }
 
     void onPasteLevelString(CCObject* sender) {
-        /*std::string cb = clipboard::read();
-        GameManager::sharedState()->m_editorClipboard = cb;
-        m_editorLayer->createObjectsFromString(cb, true, true);
-        LevelSettingsObject* obj = LevelSettingsObject::objectFromString(cb);
-        log::debug("BG: {}, MG: {}, G: {}", obj->m_backgroundIndex, obj->m_middleGroundIndex, obj->m_groundIndex);
-        m_editorLayer->m_levelSettings = obj;
-        m_editorLayer->levelSettingsUpdated();*/
-
-        // sry [redacted] ik this is indeed ass but my game keeps crashing with the code above
         std::string levelString = clipboard::read();
-        LevelSettingsObject* obj = LevelSettingsObject::objectFromString(levelString);
+        gd::string decompString = levelString;
+        if (Utils::isCompressedLevel(decompString)) {
+            decompString = ZipUtils::decompressString(decompString, false, 0);
+        } else { // if you had like 1;2 for some reason instead on your clipboard
+            levelString = ZipUtils::compressString(levelString, false, 0);
+        };
         m_editorLayer->m_level->m_levelString = levelString;
+        LevelSettingsObject* obj =  Utils::LevelSettingsObject(decompString);
+        if (obj) {
+            if (m_editorLayer->m_levelSettings) {
+                m_editorLayer->m_levelSettings->release();
+                m_editorLayer->m_levelSettings = nullptr;
+            }
+            obj->retain();
+            obj->m_level = m_editorLayer->m_level; 
+            m_editorLayer->m_levelSettings = obj;
+            m_editorLayer->levelSettingsUpdated();
+            m_editorLayer->loadLevelSettings();
+        } else {
+            log::error("failed to create LevelSettingsObject?");
+        }
+
+        // place the objects in the editor
+        m_editorLayer->removeAllObjects();
+        m_editorLayer->createObjectsFromString(decompString, true, true);
+
         MDPopup* popup = MDPopup::create(
             "Level Pasted",
             "Level pasted <cg>successfully</c>!\n\n"
             "<cr>Important:</c>\n"
-            "- You must manually set song ID, gamemode, and some metadata\n"
-            "- Secret coins are automatically removed (game limitation)\n\n"
-            "To apply changes:\n\n"
-            "<cr>Exit the editor</c> using \"<cp>Exit</c>\" (NOT \"<cy>Save and Exit</c>\"). "
-            "Then reopen the level.\n\n\n(if you send me a bug report saying the mod is broken "
-            "WITHOUT reading the info above, i'm ignoring it).",
+            "- You must manually set song ID and some metadata as they are not included in the level string\n"
+            "- Secret coins are automatically removed (game limitation)\n\n",
             "OK"
         );
         m_fields->m_popup = popup;
