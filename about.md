@@ -31,6 +31,15 @@ This mod adds some cool <cg>utilities</c> for anyone who wishes to make <cy>Geom
 
 <mod:hjfod.gdshare>
 
+**Copy Main Levels**: This mod lets you copy the main levels, in case you have issues with copying the main levels using this mod.
+
+<mod:dominodev.copymainlevels>
+
 ## Incompatibilities
 
-- Eclipse: Read-only level preview code may overlap a bit, but it seems to work fine.
+- Eclipse Menu: Read-only level preview code may overlap a bit, but it seems to work fine.
+
+## Credits
+
+- Eclipse Menu developers: Source code reuse under Eclipse Public License
+- Capeling: Original mod feature ideas
