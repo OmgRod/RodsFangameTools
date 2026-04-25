@@ -43,3 +43,5 @@ This mod adds some cool <cg>utilities</c> for anyone who wishes to make <cy>Geom
 
 - Eclipse Menu developers: Source code reuse under Eclipse Public License
 - Capeling: Original mod feature ideas
+- Erymanthus - Re-reviewing this mod 7 times before finally being accepted (and for fixing a macOS-only bug for me)
+- Cosmella - (mostly) Fixing a bug where the level wouldn't paste immediately

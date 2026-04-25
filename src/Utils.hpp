@@ -3,6 +3,7 @@
 #include <Geode/Geode.hpp>
 
 using namespace geode::prelude;
+
 namespace Utils {
     inline bool isCompressedLevel(const std::string& s) {
         size_t i = s.find_first_not_of(" \t\n\r");

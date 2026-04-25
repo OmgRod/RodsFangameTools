@@ -2,11 +2,12 @@
 
 ## v1.0.6
 
-- Fixed crash caused by entering The Tower on macOS
+- Fixed crash caused by entering The Tower on macOS (fix [#1](https://github.com/OmgRod/RodsFangameTools/pull/1) by Erymanthus)
+- Fixed bug where the level wouldn't paste immediately when clicking the button (fix [#2](https://github.com/OmgRod/RodsFangameTools/pull/2) by Cosmella)
 
 ## v1.0.5
 
-- No changes
+- No changes (yeah just ignore this release lol)
 
 ## v1.0.4
 
