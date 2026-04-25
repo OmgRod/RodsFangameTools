@@ -103,10 +103,12 @@ class $modify(MyLevelPage, LevelPage) {
 
     void updateDynamicPage(GJGameLevel* level) {
         LevelPage::updateDynamicPage(level);
-        if (level->m_levelID > 0) {
-            m_fields->m_menu->setVisible(true);
-        } else {
-            m_fields->m_menu->setVisible(false);
+        if (m_fields->m_menu) {
+            if (level->m_levelID > 0) {
+                m_fields->m_menu->setVisible(true);
+            } else {
+                m_fields->m_menu->setVisible(false);
+            }
         }
     }
 };

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.4
+
+- Fixed crash caused by opening the level select screen with the "Copy Main Levels" setting off
+
 ## v1.0.3
 
 - Added back the copy button in level selection screen
