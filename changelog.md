@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.7
+
+- Added coin swap (swaps secret coins for user coins)
+- Added new "coin type" setting - ensures either secret coins are swapped with user coins and vice versa
+
 ## v1.0.6
 
 - Fixed crash caused by entering The Tower on macOS (fix [#1](https://github.com/OmgRod/RodsFangameTools/pull/1) by Erymanthus)

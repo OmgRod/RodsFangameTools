@@ -35,6 +35,7 @@ class $modify(MyEditLevelLayer, EditLevelLayer) {
     void copyLevel(CCObject* sender) {
         std::string levelCopyType = Mod::get()->getSettingValue<std::string>("level-copy-type");
         std::string levelString = m_level->m_levelString;
+        levelString = Utils::processLevelString(levelString);
 
         if (levelCopyType == "Encoded") {
             clipboard::write(levelString);
@@ -94,7 +95,9 @@ class $modify(MyLevelPage, LevelPage) {
         GJGameLevel* level = glm->createNewLevel();
         level->copyLevelInfo(m_level);
         level->m_levelType = GJLevelType::Editor;
-        level->m_levelString = llm->getMainLevelString(m_level->m_levelID);
+        std::string levelString = llm->getMainLevelString(m_level->m_levelID);
+        levelString = Utils::processLevelString(levelString);
+        level->m_levelString = levelString;
 
         CCScene* scene = EditLevelLayer::scene(level);
         CCTransitionFade* transition = CCTransitionFade::create(0.5f, scene);
@@ -153,6 +156,7 @@ class $modify(MyEditorPauseLayer, EditorPauseLayer) {
 
     void onPasteLevelString(CCObject* sender) {
         std::string levelString = clipboard::read();
+        levelString = Utils::processLevelString(levelString);
         gd::string decompString = levelString;
         if (Utils::isCompressedLevel(decompString)) {
             decompString = ZipUtils::decompressString(decompString, false, 0);
@@ -199,6 +203,7 @@ class $modify(MyEditorPauseLayer, EditorPauseLayer) {
     void onCopyLevelString(CCObject* sender) {
         std::string levelCopyType = Mod::get()->getSettingValue<std::string>("level-copy-type");
         std::string levelString = m_editorLayer->m_level->m_levelString;
+        levelString = Utils::processLevelString(levelString);
 
         if (levelCopyType == "Encoded") {
             clipboard::write(levelString);
@@ -284,7 +289,9 @@ class $modify(MyLevelAreaInnerLayer, LevelAreaInnerLayer) {
         GJGameLevel* level = glm->createNewLevel();
         level->copyLevelInfo(GameLevelManager::sharedState()->getMainLevel(levelID, true));
         level->m_levelType = GJLevelType::Editor;
-        level->m_levelString = llm->getMainLevelString(levelID);
+        std::string levelString = llm->getMainLevelString(levelID);
+        levelString = Utils::processLevelString(levelString);
+        level->m_levelString = levelString;
 
         CCScene* scene = EditLevelLayer::scene(level);
         CCTransitionFade* transition = CCTransitionFade::create(0.5f, scene);

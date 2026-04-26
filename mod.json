@@ -39,6 +39,16 @@
 			"type": "string",
 			"default": "Encoded",
 			"one-of": ["Encoded", "Decoded"]
+		},
+		"misc-title": {
+			"name": "Miscellaneous",
+			"type": "title"
+		},
+		"coin-type": {
+			"name": "Coin Type",
+			"type": "string",
+			"default": "User",
+			"one-of": ["Secret", "User"]
 		}
 	},
 	"links": {
